@@ -12,7 +12,7 @@ import {
   stocksReaction,
 } from '@/sketches';
 // import { reflectingBall } from '@/sketches/reflectingBall';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -56,16 +56,19 @@ export default function Home() {
 
   // IMPORTANT: Place your music files in the 'public/music' directory
   // Example: public/music/track1.mp3, public/music/track2.mp3
-  const musicTracks = [
-    '/music/track1.mp3', // Replace with your actual music file names
-    '/music/track2.mp3',
-    '/music/track3.mp3',
-    '/music/track4.mp3',
-    '/music/track5.mp3',
-    '/music/track6.mp3',
-    '/music/track7.mp3',
-    '/music/track8.mp3',
-  ];
+  const musicTracks = useMemo(
+    () => [
+      '/music/track1.mp3', // Replace with your actual music file names
+      '/music/track2.mp3',
+      '/music/track3.mp3',
+      '/music/track4.mp3',
+      '/music/track5.mp3',
+      '/music/track6.mp3',
+      '/music/track7.mp3',
+      '/music/track8.mp3',
+    ],
+    []
+  );
   useEffect(() => {
     setScreenWidth(window.innerWidth);
     setScreenHeight(window.innerHeight);

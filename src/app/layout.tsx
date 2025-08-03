@@ -37,8 +37,14 @@ export default function RootLayout({
           href='https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&family=Silkscreen:wght@400;700&family=Space+Grotesk:wght@300..700&display=swap'
           rel='stylesheet'
         />
-        <Script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js" strategy="beforeInteractive" />
-        <Script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js" strategy="beforeInteractive" />
+        <Script
+          src='https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js'
+          strategy='beforeInteractive'
+        />
+        <Script
+          src='https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js'
+          strategy='beforeInteractive'
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
