@@ -244,8 +244,8 @@ const P5CanvasComponent = ({
     sketch,
     currentSketch,
     isSketchLoaded,
-    isRunning,
-  ]); // Added isRunning dependency
+    // REMOVED: isRunning from dependencies to prevent recreation
+  ]);
 
   // NEW: Effect to handle play/pause functionality
   useEffect(() => {
