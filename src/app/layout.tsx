@@ -41,10 +41,10 @@ export default function RootLayout({
           src='https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js'
           strategy='beforeInteractive'
         />
-        <Script
+        {/* <Script
           src='https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js'
           strategy='beforeInteractive'
-        />
+        /> */}
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}

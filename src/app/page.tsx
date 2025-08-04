@@ -9,7 +9,9 @@ import {
   reflectingBall,
   randomCircles,
   playPractice,
-  stocksReaction,
+  playAgain,
+  connectNoColor,
+  //stocksReaction,
 } from '@/sketches';
 // import { reflectingBall } from '@/sketches/reflectingBall';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
@@ -42,6 +44,8 @@ export default function Home() {
 
   // NEW: List of available sketches and current sketch index
   const sketches = [
+    connectNoColor,
+    playAgain,
     playPractice,
     bouncingBallSketch,
     firstImage,
@@ -49,13 +53,11 @@ export default function Home() {
     waveAnimationSketch,
     reflectingBall,
     randomCircles,
-    stocksReaction, // NEW: Added the new sketch to the list
+    //stocksReaction, // NEW: Added the new sketch to the list
     //reflectingBallSketch
   ];
   const [currentSketchIndex, setCurrentSketchIndex] = useState(0); // Start with playPractice
 
-  // IMPORTANT: Place your music files in the 'public/music' directory
-  // Example: public/music/track1.mp3, public/music/track2.mp3
   const musicTracks = useMemo(
     () => [
       '/music/track1.mp3', // Replace with your actual music file names
@@ -68,7 +70,8 @@ export default function Home() {
       '/music/track8.mp3',
     ],
     []
-  );
+  ); // `useMemo` is a React hook that "memoizes" (remembers) the result of a function. Here, it ensures that the `musicTracks` array is only created once, when the component first renders, and not on every subsequent re-render. This is an optimization to prevent unnecessary re-creations of the array.
+
   useEffect(() => {
     setScreenWidth(window.innerWidth);
     setScreenHeight(window.innerHeight);
@@ -196,7 +199,6 @@ export default function Home() {
         alignItems: 'center',
         justifyContent: 'center',
         background: '#p50p50',
-        //backgroundColor:'green'
         // 'linear-gradient(to bottom right, #e0e7ff, #c7d2fe, #6366f1)',
       }}
     >
@@ -205,7 +207,8 @@ export default function Home() {
       >
         canvas
       </Box>
-      <Box
+      {/* Screen size toggle Box and button */}
+      {/* <Box
         sx={{
           position: 'fixed',
           top: 12,
@@ -215,14 +218,13 @@ export default function Home() {
           alignItems: 'center',
           cursor: 'pointer',
           userSelect: 'none',
-          // background: 'rgba(255,255,255,0.8)',
           borderRadius: 2,
           px: 0,
           py: 0,
           boxShadow: 2,
         }}
         //onClick={() => setUseScreenSize((prev) => !prev)}
-      ></Box>
+      ></Box> */}
       {/* {useScreenSize ? (
           <ToggleOnIcon  fontSize='medium' />
         ) : (
@@ -238,14 +240,14 @@ export default function Home() {
       {/* NEW: Container for P5Canvas and the Play/Pause button */}
       <Box
         sx={{
-          p: 0,
+          p: 1,
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           backgroundColor: '#p50p50',
         }}
       >
-        {/* Previous Sketch Button (Left) */}
+        {/* Previous-Sketch ArrowBack Button (Left) */}
         <Button
           variant='contained'
           onClick={handlePrevSketch}
@@ -289,7 +291,7 @@ export default function Home() {
             isRunning={isSketchRunning}
           />
 
-          {/* Play/Pause Button layered on top */}
+          {/* Box and Play/Pause Button layered on top of canvas */}
           <Box
             sx={{
               position: 'absolute',
@@ -349,12 +351,8 @@ export default function Home() {
           <ArrowForwardIosIcon fontSize='large' />
         </Button>
       </Box>
-
-      {/* <P5Canvas width={800} height={600} sketch={bouncingBallSketch} /> */}
       <Box>
-        {/* NEW: Sketch Animation Controls */}
-        {/* Music Player Controls */}
-
+        {/* Music Player Controls at the bottom of the page*/}
         <Box sx={{ mt: 2, mb: 2, display: 'flex', gap: 1 }}>
           <Button
             variant='contained'
@@ -377,7 +375,6 @@ export default function Home() {
               alignItems: 'center', // Center content vertically
             }}
           >
-            {/* Prev */}
             <SkipPreviousIcon />
           </Button>
           <Button
@@ -403,7 +400,6 @@ export default function Home() {
               alignItems: 'center', // Center content vertically
             }}
           >
-            {/* {isPlaying ? 'Pause' : 'Play'} */}
             {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
           </Button>
           <Button
@@ -427,7 +423,6 @@ export default function Home() {
               alignItems: 'center', // Center content vertically
             }}
           >
-            {/* Next */}
             <SkipNextIcon />
           </Button>
         </Box>

@@ -32,21 +32,26 @@ interface ShapeProps {
   offsetX?: number;
   offsetY?: number;
   baseSize?: number;
-  amplitudeSize?: number;
-  frequencySize?: number;
-  offsetSize?: number;
-  amplitudeStrokeWeight?: number;
-  frequencyStrokeWeight?: number;
-  offsetStrokeWeight?: number;
+  amplitudeSize?: number; // Optional. How much the size of the shape fluctuates during animation.
+  frequencySize?: number; // Optional. How fast the size fluctuation happens.
+  offsetSize?: number; // Optional. A starting point (phase offset) for the size fluctuation.
+  amplitudeStrokeWeight?: number; // Optional. How much the stroke weight fluctuates.
+  frequencyStrokeWeight?: number; // Optional. How fast the stroke weight fluctuation happens.
+  offsetStrokeWeight?: number; // Optional. A starting point (phase offset) for the stroke weight fluctuation.
+
   baseStrokeWeight?: number;
-  amplitudeColorR?: number;
-  amplitudeColorG?: number;
-  amplitudeColorB?: number;
-  amplitudeColorA?: number;
-  frequencyColor?: number;
-  offsetColor?: number;
-  randomizeColor?: boolean;
-  randomColorInterval?: number;
+  amplitudeColorR?: number; // Optional. How much the Red (or Hue) component of the color fluctuates.
+  amplitudeColorG?: number; // Optional. How much the Green (or Saturation) component fluctuates.
+  amplitudeColorB?: number; // Optional. How much the Blue (or Brightness) component fluctuates.
+  amplitudeColorA?: number; // Optional. How much the Alpha (transparency) component fluctuates.
+  frequencyColor?: number; // Optional. How fast the color fluctuation happens.
+  offsetColor?: number; // Optional. A starting point (phase offset) for the color fluctuation.
+
+  randomizeColor?: boolean; // Optional. If true, the color will change randomly instead of rhythmically.
+  randomColorInterval?: number; // Optional. How often (in frames) the random color should change.
+
+  // Vertex coordinates for complex shapes (lines, triangles, quads).
+  // These are relative to the shape's main (x, y) position.
   v1x?: number;
   v1y?: number;
   v2x?: number;
@@ -69,28 +74,15 @@ export class Shape {
   size: number; // For circle, square, point (diameter/side length)
   baseSize: number; // The original, non-animated size for circle/square/point
   image?: p5.Image; // Add property for p5.Image (for type: 'image')
-
   // Color properties
   color: number[]; // [R, G, B, A] or [H, S, B, A] for fill - this will be the *current* animated color
   baseColor: number[]; // The original, non-animated color
   strokeColor: number[]; // [R, G, B, A] or [H, S, B, A] for stroke - this will be the *current* animated stroke color
   baseStrokeColor: number[]; // The original, non-animated stroke color
-
   // Stroke Weight properties
   strokeWeight: number; // The current animated stroke weight
   baseStrokeWeight: number; // The original, non-animated stroke weight
-
-  rotation: number; // In radians
-
-  // Specific parameters for complex shapes (e.g., triangle vertices, line endpoints, quad vertices)
-  // These will be relative to the shape's (x,y) if translate is used, or absolute if not.
-  // For simplicity, we'll assume absolute for now, or relative to (x,y) for basic shapes.
-  // For line, triangle, quad, we'll expect specific vertex coordinates.
-  // x1?: number; y1?: number;
-  // x2?: number; y2?: number;
-  // x3?: number; y3?: number;
-  // x4?: number; y4?: number;
-
+  rotation: number; // The shape's current rotation angle. In radians
   // Specific parameters for complex shapes (vertices relative to this.x, this.y)
   // These will define the shape's form, assuming (this.x, this.y) is its anchor point.
   v1x: number;
@@ -104,25 +96,25 @@ export class Shape {
 
   // Animation properties
   rotationSpeed: number; // How fast this shape rotates (radians per frame)
-  amplitudeX: number; // For sine wave motion in X
-  amplitudeY: number; // For sine wave motion in Y
-  frequencyX: number; // For sine wave motion in X
-  frequencyY: number; // For sine wave motion in Y
-  offsetX: number; // Initial X offset for sine wave motion
-  offsetY: number; // Initial Y offset for sine wave motion
+  amplitudeX: number; // For sine wave motion in X. Max horizontal movement from its `initialX`.
+  amplitudeY: number; // For sine wave motion in Y. Max vertical movement from its `initialY`.
+  frequencyX: number; // For sine wave motion in X. Speed of horizontal oscillation.
+  frequencyY: number; // For sine wave motion in Y. Speed of vertical oscillation.
+  offsetX: number; // Initial X offset for horizontalsine wave motion
+  offsetY: number; // Initial Y offset for vertical sine wave motion
 
   // Store initial position for animation reset or relative movement
-  initialX: number;
-  initialY: number;
+  initialX: number; // The shape's starting X-coordinate (used as the center for oscillations).
+  initialY: number; // The shape's starting Y-coordinate.
   // NEW: Properties for size animation
 
-  amplitudeSize: number; // How much the size fluctuates
-  frequencySize: number; // How fast the size fluctuates
-  offsetSize: number; // Phase offset for the size fluctuation
+  amplitudeSize: number; // How much the size fluctuate. Max size change from `baseSize`.s
+  frequencySize: number; // How fast the size fluctuates. Speed of size oscillation.
+  offsetSize: number; // Phase offset for the size fluctuation. Used to control when the size starts changing.
 
   // NEW: Properties for stroke weight animation
-  amplitudeStrokeWeight: number; // How much the stroke weight fluctuates
-  frequencyStrokeWeight: number; // How fast the stroke weight fluctuates
+  amplitudeStrokeWeight: number; // How much the stroke weight fluctuates. Max stroke weight change from `baseStrokeWeight`.
+  frequencyStrokeWeight: number; // How fast the stroke weight fluctuates. Speed of stroke weight oscillation.
   offsetStrokeWeight: number; // Phase offset for stroke weight fluctuation
 
   // NEW: Properties for color animation (rhythmic)
@@ -227,6 +219,9 @@ export class Shape {
 
   // --- Animation Update Method ---
   update() {
+    // The 'update' method is like giving the toy its movement and appearance instructions for the CURRENT moment.
+    // It's called repeatedly (typically once per frame in P5.js's draw loop) to calculate the shape's new state.
+
     //update(deltaTime: number) {
     // Accumulate elapsed time (deltaTime is in milliseconds)
     // this.elapsedTime += deltaTime*45;
@@ -235,11 +230,10 @@ export class Shape {
     // This makes animation speed independent of frame rate
     //const timeInSeconds = this.elapsedTime / 1000;
     this.rotation += this.rotationSpeed; // // Rotation animation
-
     // Rotation animation using deltaTime: rotationSpeed is now in radians per second
     //this.rotation += this.rotationSpeed * (deltaTime / 1000);
 
-    // Sine wave motion animation for X and Y (if amplitude is set)
+    // Sine wave motion animation for X and Y (if amplitude is set). // This creates a smooth, oscillating (back-and-forth) movement.
     if (this.amplitudeX > 0) {
       this.x =
         this.initialX +
@@ -252,25 +246,28 @@ export class Shape {
         this.p.sin(this.p.frameCount * this.frequencyY + this.offsetY) *
           this.amplitudeY;
     }
-    // NEW: Sine wave motion animation for Size
+    // NEW: Sine wave motion animation for Size // This makes the shape grow and shrink rhythmically.
     if (this.amplitudeSize > 0) {
       const sizeOffset =
         this.p.sin(this.p.frameCount * this.frequencySize + this.offsetSize) *
         this.amplitudeSize;
-      this.size = this.baseSize + sizeOffset;
-      // Ensure size doesn't become negative or too small
-      this.size = this.p.max(1, this.size);
-    } else if (this.type === 'ellipse' || this.type === 'rect') {
-      // Apply size animation to both width and height relative to their base values
-      const sizeOffset =
-        this.p.sin(this.p.frameCount * this.frequencySize + this.offsetSize) *
-        this.amplitudeSize;
-      this.width = (this.baseWidth || 50) + sizeOffset;
-      this.height = (this.baseHeight || 50) + sizeOffset;
-      this.width = this.p.max(1, this.width);
-      this.height = this.p.max(1, this.height);
+      if (
+        this.type === 'circle' ||
+        this.type === 'square' ||
+        this.type === 'point'
+      ) {
+        this.size = this.baseSize + sizeOffset; // Apply offset to base size for circles/squares.
+        this.size = this.p.max(1, this.size); // Ensure size doesn't go below 1 (to avoid errors or invisible shapes).
+      } else if (this.type === 'ellipse' || this.type === 'rect') {
+        // Apply size animation to both width and height for ellipses/rectangles.
+        // `(this.baseWidth || 50)`: Uses `baseWidth` if it exists, otherwise defaults to 50. This handles cases where `baseWidth` might be undefined.
+        this.width = (this.baseWidth || 50) + sizeOffset;
+        this.height = (this.baseHeight || 50) + sizeOffset;
+        this.width = this.p.max(1, this.width); // Ensure width/height don't go below 1.
+        this.height = this.p.max(1, this.height);
+      }
     } else {
-      // If no size animation, revert to base size
+      // If no size animation (amplitudeSize is 0), revert to base size
       // If no size animation, revert to base size/dimensions
       if (
         this.type === 'circle' ||
@@ -283,11 +280,8 @@ export class Shape {
         this.height = this.baseHeight;
       }
     }
-    // Sine wave motion animation (if amplitude is set)
-    // // Update the shape's current x, y based on its initial position and calculated offset
-    // this.x = this.initialX + this.p.sin(timeInSeconds * this.frequencyX + this.offsetX) * this.amplitudeX;
-    // this.y = this.initialY + this.p.cos(timeInSeconds * this.frequencyY + this.offsetY) * this.amplitudeY;
-    // NEW: Update stroke weight
+    // Sine wave motion animation for strokeweight (if amplitude is set)
+    // Makes the outline thickness fluctuate rhythmically.
     if (this.amplitudeStrokeWeight > 0) {
       const strokeWeightOffset =
         this.p.sin(
@@ -300,11 +294,11 @@ export class Shape {
       this.strokeWeight = this.baseStrokeWeight; // Revert to base stroke weight if animation is off
     }
 
-    // NEW: Update color (either rhythmic or random)
+    // NEW: Update/Animate color (either rhythmic or random)
     if (this.randomizeColor) {
       if (
-        this.p.frameCount % this.randomColorInterval === 0 &&
-        this.p.frameCount !== this.lastRandomColorChangeFrame
+        this.p.frameCount % this.randomColorInterval === 0 && // Check if it's time to change color (e.g., every 60 frames).
+        this.p.frameCount !== this.lastRandomColorChangeFrame // Prevent changing color multiple times on the same frame.
       ) {
         // Generate new random color components (0-255)
         // Generate RGB color values
@@ -312,21 +306,24 @@ export class Shape {
           this.p.random(255),
           this.p.random(255),
           this.p.random(255),
-          this.p.random(50, 255), // Keep alpha somewhat opaque
+          this.p.random(50, 255), //Random Alpha (transparency) value (between 50 and 255).
         ];
-        this.lastRandomColorChangeFrame = this.p.frameCount;
+        this.lastRandomColorChangeFrame = this.p.frameCount; // Record the frame this change happened.
       }
     } else if (
+      // If not random, check for rhythmic color animation.
       this.frequencyColor > 0 ||
       this.amplitudeColorR > 0 ||
       this.amplitudeColorG > 0 ||
       this.amplitudeColorB > 0 ||
       this.amplitudeColorA > 0
     ) {
-      // Rhythmic color animation
+      // Rhythmic color animation: makes colors pulse or shift smoothly.
       const colorTime =
-        this.p.frameCount * this.frequencyColor + this.offsetColor;
-      // Use RGB color animation
+        this.p.frameCount * this.frequencyColor + this.offsetColor; // Calculate the 'time' for the color wave.
+      // Use RGB color animation // Apply sine wave to each color component (R, G, B, A).
+      // `p.constrain`: Ensures the color values stay within the valid range (0-255 for RGB, 0-360 for Hues, etc.).
+      // `p.PI / 3` and `(2 * p.PI) / 3` are phase offsets to make the R, G, B channels animate slightly out of sync, creating interesting color shifts.
       this.color[0] = this.p.constrain(
         this.baseColor[0] + this.p.sin(colorTime) * this.amplitudeColorR,
         0,
@@ -356,32 +353,41 @@ export class Shape {
   }
 
   display() {
-    const p = this.p;
+    // The 'display' method is like giving the toy its final instructions for how to DRAW itself right NOW.
+    // It uses the P5.js drawing tools to put the shape on the canvas based on its current animated properties.
+
+    const p = this.p; //shortcut to access the p5.js instance
 
     p.push(); // Save the current drawing style and transformation matrix
+    // 'p.push()' is like taking a snapshot of the current drawing settings (like color, stroke, rotation, translation).
+    // It's like saying, "Remember how everything is set up right now, because I'm about to change things just for this one toy."
 
     // Apply translation and rotation for the current shape
     // Translate to the shape's anchor point (this.x, this.y)
-    p.translate(this.x, this.y);
-    p.rotate(this.rotation); // Apply rotation around this translated point
+    // These transformations affect everything drawn *after* them until 'p.pop()'.
+    p.translate(this.x, this.y); // Moves the origin (0,0) of the drawing canvas to the shape's current (x,y) position.
+    // Now, when we draw the shape at (0,0) relative to this new origin, it will appear at (this.x, this.y) on the actual canvas.
+    p.rotate(this.rotation); // Apply rotation around this translated point // Rotates the drawing space around the new origin (which is now at this.x, this.y).
 
     // Set fill and stroke properties
     if (this.color && this.type !== 'image') {
+      // If the shape has a color and is not an image (images handle their own color).
       p.fill(this.color[0], this.color[1], this.color[2], this.color[3] || 255);
     } else {
-      p.noFill();
+      p.noFill(); // If no color or it's an image, don't fill the shape.
     }
 
     if (this.strokeWeight > 0 && this.type !== 'image') {
+      // If stroke weight is positive and not an image.
       p.stroke(
         this.strokeColor[0],
         this.strokeColor[1],
         this.strokeColor[2],
         this.strokeColor[3] || 255
       );
-      p.strokeWeight(this.strokeWeight);
+      p.strokeWeight(this.strokeWeight); // Set the stroke thickness.
     } else {
-      p.noStroke();
+      p.noStroke(); // If no stroke weight or it's an image, don't draw an outline.
     }
 
     // Draw the shape based on its type
@@ -401,9 +407,9 @@ export class Shape {
         p.ellipse(0, 0, this.width || 50, this.height || 50);
         break;
       case 'rect':
-        p.rectMode(p.CENTER);
+        p.rectMode(p.CENTER); // Tells P5.js to draw rectangles with their center at (x,y).
         p.rect(0, 0, this.width || 50, this.height || 50);
-        p.rectMode(p.CORNER);
+        p.rectMode(p.CORNER); // Resets rectangle drawing mode to default (top-left corner at x,y).
         break;
       case 'square':
         p.rectMode(p.CENTER);
@@ -413,6 +419,7 @@ export class Shape {
       case 'line':
         // Line coordinates are relative to (this.x, this.y)
         // So, if this.x, this.y is (100,100) and v1x,v1y is (0,0), the line starts at (100,100) on canvas.
+        // Since `p.translate(this.x, this.y)` was called, these (v1x, v1y) are offsets from the shape's main (x,y).
         p.line(this.v1x, this.v1y, this.v2x, this.v2y);
         break;
       case 'triangle':
@@ -420,6 +427,7 @@ export class Shape {
         p.triangle(this.v1x, this.v1y, this.v2x, this.v2y, this.v3x, this.v3y);
         break;
       case 'quad':
+        // Draws a quadrilateral (4-sided polygon) using four relative vertex coordinates.
         // Quad vertices are relative to (this.x, this.y)
         p.quad(
           this.v1x,
@@ -441,5 +449,7 @@ export class Shape {
     }
 
     p.pop(); // Restore the previous drawing style and transformation matrix
+    // 'p.pop()' is like restoring the drawing settings to the snapshot taken by 'p.push()'.
+    // It's like saying, "Okay, I'm done drawing this toy. Put all the drawing tools back to how they were before I started, so the next toy can be drawn without being affected by my changes."
   }
 }

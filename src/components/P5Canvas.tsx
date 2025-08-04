@@ -36,9 +36,8 @@ const P5CanvasComponent = ({
   sketchName,
   isRunning = true, // NEW: Default to true
 }: P5CanvasProps) => {
-  // --- React State and Refs (Internal Tools for the Frame) ---
   // useRef: Like a sticky note for a specific HTML element (our canvas container)
-  const canvasRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null); // A `useRef` to point to the `div` element that will *contain* our P5.js canvas. Think of it as the designated spot on the stage.
   const p5InstanceRef = useRef<import('p5') | null>(null); // useRef: Like a sticky note for the actual p5.js "artist" instance
   const [isClient, setIsClient] = useState(false); // useState: To track if we're definitely running in the user's browser
   const [currentSketch, setCurrentSketch] = useState<
@@ -79,7 +78,7 @@ const P5CanvasComponent = ({
     }
   }, [sketchName, isClient]);
 
-  // 3. Effect to initialize p5.js and run the sketch
+  // 3. Effect to initialize p5.js and run the sketch // This is the core effect that initializes P5.js.
   useEffect(() => {
     // Only proceed if we're on the client, the canvas container is ready, AND the sketch is loaded
     if (!isClient || !canvasRef.current || !isSketchLoaded) return;
@@ -109,14 +108,11 @@ const P5CanvasComponent = ({
         }
 
         // Determine which sketch to use:
-        // 1. The one passed directly via `sketch` prop
-        // 2. The one loaded via `sketchName`
-        // 3. A simple default blank sketch if neither is provided
         const sketchToUse =
-          sketch ||
-          currentSketch ||
+          sketch || // 1. The one passed directly via `sketch` prop
+          currentSketch || // 2. The one loaded via `sketchName`
           ((p: import('p5')) => {
-            // Default sketch if no other is provided
+            // Default sketch // 3. A simple default blank sketch if neither is provided
             p.setup = () => {
               p.background(0); // Default background
             };
@@ -124,13 +120,13 @@ const P5CanvasComponent = ({
           });
 
         // Create the final sketch function that will be passed to new p5()
+        // This `finalP5Sketch` is a function that P5.js will actually run. It acts as a "middleman" to ensure your sketch runs correctly.
         const finalP5Sketch = (p: import('p5')) => {
           // Ensure p5 instance is properly initialized
           if (!p) {
             console.error('P5 instance is undefined');
             return;
           }
-
           // 1. Execute the user's provided sketch function.
           try {
             sketchToUse(p);
@@ -146,9 +142,8 @@ const P5CanvasComponent = ({
           // 3. Override p.setup to always create and parent the canvas
           p.setup = () => {
             try {
-              // Create canvas first
+              // Create canvas first// 1. Create the P5.js canvas. This MUST happen before any P5.js drawing commands or property access.
               const createdCanvas = p.createCanvas(width, height);
-
               // Ensure canvas was created successfully
               if (!createdCanvas || !p.width || !p.height) {
                 console.error('Canvas was not created properly');
@@ -158,6 +153,7 @@ const P5CanvasComponent = ({
               if (canvasRef.current) {
                 createdCanvas.parent(canvasRef.current);
                 // Ensure the canvas element itself has no default margins and is a block element
+                // Apply CSS styles directly to the canvas element for proper display within the flexbox container.
                 createdCanvas.elt.style.display = 'block';
                 createdCanvas.elt.style.margin = '0';
                 createdCanvas.elt.style.padding = '0';
@@ -319,7 +315,7 @@ const P5CanvasComponent = ({
         sx={{
           width: `${width}px`,
           height: `${height}px`,
-          border: '2px solid gray',
+          //border: '2px solid gray',
           borderRadius: '8px',
           boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
           background: 'white',
@@ -332,6 +328,8 @@ const P5CanvasComponent = ({
     </Box>
   );
 };
+
+// `export default dynamic` is a Next.js feature that makes sure this component is only loaded and rendered on the client-side.
 
 // Export with no SSR to prevent window errors
 export default dynamic(() => Promise.resolve(P5CanvasComponent), {
