@@ -11,6 +11,7 @@ import {
   playPractice,
   playAgain,
   connectNoColor,
+  center,
   //stocksReaction,
 } from '@/sketches';
 // import { reflectingBall } from '@/sketches/reflectingBall';
@@ -44,6 +45,7 @@ export default function Home() {
 
   // NEW: List of available sketches and current sketch index
   const sketches = [
+    center,
     connectNoColor,
     playAgain,
     playPractice,
